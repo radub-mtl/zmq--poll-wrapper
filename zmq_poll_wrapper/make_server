@@ -1,0 +1,1 @@
+g++ -lzmq server.cpp -o server --std=gnu++0x
