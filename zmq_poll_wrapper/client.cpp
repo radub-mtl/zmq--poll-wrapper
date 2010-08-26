@@ -26,7 +26,7 @@ int main (int argc, const char* argv[])
 		memcpy (query.data (), query_string, strlen (query_string) + 1);
 		// Send the query
 		s.send (query);
-	 
+	 	//printf ("send: '%s'\n", query_string);
 		// Receive and display the result
 		zmq::message_t resultset;
 		s.recv (&resultset);
@@ -35,7 +35,7 @@ int main (int argc, const char* argv[])
 		cc = resultset_string[0];
         }while ( cc == '1');
         
-        zmq_sleep(5);
+        zmq_sleep(1);
         
         zmq::message_t w (strlen (query_string) + 1);
         memcpy (w.data (), query_string, strlen (query_string) + 1);
