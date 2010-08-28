@@ -101,6 +101,33 @@ struct reactor
 	{
 		return this->operator()((void*)0, timeout);
 	}
+	
+	template <typename R>
+	int run(R* r = 0,  int timeout = -1, int (*begin)(R*, reactor&, int&) = 0, int (*end)(R*, reactor&, int&, int) = 0)
+	{
+		while (1)
+		{
+			int tmout = timeout;
+			if (begin)
+			{
+				int ret = begin(r, *this, tmout);
+				if (ret) return ret;
+			}
+			int ret = this->operator()(r, tmout);
+			if (ret == -1)
+				return ret;
+			if (end)
+			{
+				int ret = end(r, *this, tmout, ret);
+				if (ret) return ret;
+			}
+		}
+	}
+	int run(int timeout = -1) //  overload to keep VS2010 happy - no defaults for functions
+	{
+		return run((void*)0, timeout, 0, 0);
+	}
+	
 private:
 	template <class K, class TT>
 	static int getIndex(const K& k, TT* t)
