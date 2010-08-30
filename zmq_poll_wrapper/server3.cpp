@@ -9,6 +9,8 @@
 
 #include "reactor.hpp"
 
+using namespace ZMQ_REACTOR; 
+
 
 template <class T>
 struct ReactorEvent1
@@ -92,12 +94,13 @@ try
 	ReactorEvent2<BITS> e2(bits);
 	PollEventInterface pe2(&e2);
 	r.add(s, ZMQ_POLLIN, &pe1);
+	r.add(s1, ZMQ_POLLIN, &pe2);
 	
 	while (1) 
 	{
 		if (bits.count('a') && bits['a'] )
 		{
-			bool t = r.add(s1, ZMQ_POLLIN, &pe2);
+			bool t = r.add(s1, ZMQ_POLLIN, &pe2, true);
 			printf ("added pe2: %d\n", t);
 		}
 		if (bits.count('x') && !bits['x'] )

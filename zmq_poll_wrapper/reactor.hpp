@@ -37,6 +37,9 @@
 #include "OneMethodOnePointerParamInterface.hpp"
 #include <algorithm>
 
+namespace ZMQ_REACTOR
+{
+
 typedef OneMthdOneParamPtrInterface<zmq::socket_t> PollEventInterface;
 
 
@@ -63,22 +66,22 @@ void trait(T& t, V* v, void* r)
 };
 
 
-template <class T, class V = zmq::socket_t>
+template <class CBK, class SOCKET = zmq::socket_t>
 struct reactor
 {
-	bool add(V& v, short event, T* t, bool checkIfSocketAddedTwice = 0)
+	bool add(SOCKET& v, short event, CBK* t, bool checkIfSocketAddedTwice = 0)
 	{
 		zmq_pollitem_t item = {0,0,0,0};
 		set(v, item);
 		item.events = event;
 		return addImpl(item, v, t, checkIfSocketAddedTwice);
 	}
-	bool remove(V& v)
+	bool remove(SOCKET& v)
 	{
 		return removeImpl(v);
 	}
-	template <typename R>
-	int operator()(R* r = 0, int timeout = -1)
+	template <typename STATE>
+	int operator()(STATE* r = 0, int timeout = -1)
 	{
 		int ret = zmq::poll (&items_[0], items_.size(), timeout);
 		if ((ret == 0) || (ret == -1) )
@@ -90,8 +93,8 @@ struct reactor
 		{
 			if (i->revents & i->events)
 			{	
-				T& t = *((T*)*c);
-				V* v = *sk;
+				CBK& t = *((CBK*)*c);
+				SOCKET* v = *sk;
 				trait(t,v, r);
 			}
 		}
@@ -102,8 +105,10 @@ struct reactor
 		return this->operator()((void*)0, timeout);
 	}
 	
-	template <typename R>
-	int run(R* r = 0,  int timeout = -1, int (*begin)(R*, reactor&, int&) = 0, int (*end)(R*, reactor&, int&, int) = 0)
+	template <typename STATE>
+	int run(	STATE* r = 0,  int timeout = -1, 
+			int (*begin)(STATE*, reactor&, int&) = 0, 
+			int (*end)(STATE*, reactor&, int&, int) = 0)
 	{
 		while (1)
 		{
@@ -135,7 +140,7 @@ private:
 	  	auto it = std::find( k.begin(), k.end(), t );
     		return it == k.end() ? -1 : it - k.begin();
 	}
-	bool addImpl(zmq_pollitem_t& item, V& v, T* t, bool checkIfSocketAddedTwice)
+	bool addImpl(zmq_pollitem_t& item, SOCKET& v, CBK* t, bool checkIfSocketAddedTwice)
 	{
 		//if added twice it hangs
 		if (checkIfSocketAddedTwice && (getIndex(socks_, &v) > -1) )
@@ -152,7 +157,7 @@ private:
 		k.erase(k.begin() + pos);
 	}
 	
-	bool removeImpl(V& v)
+	bool removeImpl(SOCKET& v)
 	{
 		int pos = getIndex(socks_, &v);
 		if (pos == -1)
@@ -164,11 +169,12 @@ private:
 	}
 private:
 	std::vector<zmq_pollitem_t> items_;
-	std::vector<T*> callbacks_;
-	std::vector<V*> socks_;
+	std::vector<CBK*> callbacks_;
+	std::vector<SOCKET*> socks_;
 	bool checkIfSocketAddedTwice_;
 };
 
+}
 
 
 #endif

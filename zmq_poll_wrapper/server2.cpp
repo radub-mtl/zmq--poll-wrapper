@@ -9,7 +9,7 @@
 
 #include "reactor.hpp"
 
-
+using namespace ZMQ_REACTOR; 
 
 struct State
 {

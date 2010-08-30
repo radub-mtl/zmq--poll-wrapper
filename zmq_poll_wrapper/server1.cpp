@@ -8,7 +8,7 @@
 #include <string>
 
 #include "reactor.hpp"
-
+using namespace ZMQ_REACTOR; 
 
 template <class T>
 struct ReactorEvent1

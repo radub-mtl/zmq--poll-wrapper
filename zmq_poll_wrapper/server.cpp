@@ -9,6 +9,8 @@
 
 #include "reactor.hpp"
 
+using namespace ZMQ_REACTOR; 
+
 typedef void (EVT_OP)(zmq::socket_t* s);
 
 struct IReactorEvent

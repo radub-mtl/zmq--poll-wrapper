@@ -9,6 +9,9 @@
 
 #include "reactor.hpp"
 
+
+using namespace ZMQ_REACTOR; 
+
 typedef std::map<char, bool> BITS;
 
 struct State
